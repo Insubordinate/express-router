@@ -1,7 +1,7 @@
+const bodyParser = require('body-parser')
 const express = require('express')
-const fruit_router = require('./fruits')
 const user_router = express.Router()
-
+const {check,validationResult} = require('express-validator')
 
 
 user_router.use(express.json())
@@ -39,9 +39,20 @@ user_router.get('/:id',(req,res)=>{
 })
 
 
-user_router.post('/',(req,res)=>{
-    users.push(req.body)
-    res.json(users)
+user_router.post('/',
+                check('name')
+                .isLength({min:1})
+                .withMessage('Must be 1 character minimum')
+                .isAlpha()
+                .withMessage('No numbers'),
+                (req,res)=>{
+                    const errors = validationResult(req)
+                    if (!errors.isEmpty()){
+                        return res.status(400).json({errors:errors.array()});
+                    }
+
+                    users.push(req.body)
+                    res.json(users)
 })
 
 user_router.put('/:id',(req,res)=>{

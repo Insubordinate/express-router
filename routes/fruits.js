@@ -1,6 +1,6 @@
 const express = require('express')
 const fruit_router = express.Router()
-
+const {check,validationResult} = require('express-validator')
 
 fruit_router.use(express.json())
 fruit_router.use(express.urlencoded())
@@ -38,9 +38,19 @@ fruit_router.get('/:id',async(req,res)=>{
 
 
 
-fruit_router.post('/',(req,res)=>{
-    fruits.push(req.body)
-    res.json(fruits)
+fruit_router.post('/',
+    check('color')
+    .isLength({min:1})
+    .withMessage('Must be 1 character minimum')
+    .isAlpha()
+    .withMessage('No Numbers')
+    ,(req,res)=>{
+        const errors = validationResult(req)
+        if (!errors.isEmpty()){
+            return res.status(400).json({errors:errors.array()});
+        }
+        fruits.push(req.body)
+        res.json(fruits)
 })
 
 fruit_router.put('/:id',(req,res)=>{
